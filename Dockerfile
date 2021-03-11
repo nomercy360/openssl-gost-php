@@ -234,6 +234,8 @@ RUN set -eux; \
 	} | tee php-fpm.d/zz-docker.conf; \
       unlink /usr/bin/openssl && \
       ln -s /opt/cprocsp/cp-openssl-1.1.0/bin/amd64/openssl /usr/bin/openssl
+
+ENV PATH=/opt/cprocsp/bin/amd64/:/opt/cprocsp/sbin/amd64/:${PATH}
 COPY openssl.cnf /etc/ssl/openssl.cnf
 
 # Override stop signal to stop process gracefully
