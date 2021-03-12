@@ -16,7 +16,7 @@ ENV PHPIZE_DEPS \
         openssl
 
 ENV PHP_INI_DIR /usr/local/etc/php
-ENV PHP_EXTRA_CONFIGURE_ARGS --enable-fpm --with-fpm-user=www-data --with-fpm-group=www-data --disable-cgi
+ENV PHP_EXTRA_CONFIGURE_ARGS --enable-fpm --with-fpm-user=root --with-fpm-group=root --disable-cgi
 ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
@@ -233,9 +233,20 @@ RUN set -eux; \
 		echo 'listen = 9000'; \
 	} | tee php-fpm.d/zz-docker.conf; \
       unlink /usr/bin/openssl && \
-      ln -s /opt/cprocsp/cp-openssl-1.1.0/bin/amd64/openssl /usr/bin/openssl
+      cd /usr/bin/ && \
+      ln -s /opt/cprocsp/cp-openssl-1.1.0/bin/amd64/openssl  && \
+      ln -s /opt/cprocsp/bin/amd64/certmgr  && \
+      ln -s /opt/cprocsp/bin/amd64/cpverify  && \
+      ln -s /opt/cprocsp/bin/amd64/cryptcp  && \
+      ln -s /opt/cprocsp/bin/amd64/csptest  && \
+      ln -s /opt/cprocsp/bin/amd64/csptestf && \
+      ln -s /opt/cprocsp/bin/amd64/csptestlite && \
+      ln -s /opt/cprocsp/bin/amd64/der2xer && \
+      ln -s /opt/cprocsp/bin/amd64/genkpim && \
+      ln -s /opt/cprocsp/bin/amd64/inittst && \
+      ln -s /opt/cprocsp/bin/amd64/wipefile && \
+      ln -s /opt/cprocsp/sbin/amd64/cpconfig
 
-ENV PATH=/opt/cprocsp/bin/amd64/:/opt/cprocsp/sbin/amd64/:${PATH}
 COPY openssl.cnf /etc/ssl/openssl.cnf
 
 # Override stop signal to stop process gracefully
@@ -243,4 +254,4 @@ COPY openssl.cnf /etc/ssl/openssl.cnf
 STOPSIGNAL SIGQUIT
 
 EXPOSE 9000
-CMD ["php-fpm"]
+CMD ["php-fpm", "-R"]
