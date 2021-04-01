@@ -49,8 +49,24 @@ RUN set -eux; \
     rm -f linux-amd64_deb.tgz && \
     linux-amd64_deb/install.sh && \
     apt -y install ./linux-amd64_deb/cprocsp-cpopenssl-110-* && \
-    rm -rf linux-amd64_deb.tgz;
-	
+    rm -rf linux-amd64_deb.tgz; \
+	unlink /usr/bin/openssl && \
+      cd /usr/bin/ && \
+      ln -s /opt/cprocsp/cp-openssl-1.1.0/bin/amd64/openssl  && \
+      ln -s /opt/cprocsp/bin/amd64/certmgr  && \
+      ln -s /opt/cprocsp/bin/amd64/cpverify  && \
+      ln -s /opt/cprocsp/bin/amd64/cryptcp  && \
+      ln -s /opt/cprocsp/bin/amd64/csptest  && \
+      ln -s /opt/cprocsp/bin/amd64/csptestf && \
+      ln -s /opt/cprocsp/bin/amd64/csptestlite && \
+      ln -s /opt/cprocsp/bin/amd64/der2xer && \
+      ln -s /opt/cprocsp/bin/amd64/genkpim && \
+      ln -s /opt/cprocsp/bin/amd64/inittst && \
+      ln -s /opt/cprocsp/bin/amd64/wipefile && \
+      ln -s /opt/cprocsp/sbin/amd64/cpconfig
+
+COPY openssl.cnf /etc/ssl/openssl.cnf
+
 STOPSIGNAL SIGQUIT
 
 EXPOSE 9000
