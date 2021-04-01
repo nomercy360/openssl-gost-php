@@ -1,0 +1,57 @@
+FROM debian:buster-slim
+
+COPY linux-amd64_deb.tgz linux-amd64_deb.tgz
+ENV PHPIZE_DEPS \
+		autoconf \
+		dpkg-dev \
+		file \
+		g++ \
+		gcc \
+		libc-dev \
+		make \
+		pkg-config \
+		re2c \
+		lsb-base \
+        ca-certificates \
+        openssl
+
+ENV PHP_INI_DIR /usr/local/etc/php
+ENV PHP_EXTRA_CONFIGURE_ARGS --enable-fpm --with-fpm-user=root --with-fpm-group=root --disable-cgi
+ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+ENV PHP_CPPFLAGS="$PHP_CFLAGS"
+ENV PHP_LDFLAGS="-Wl,-O1 -pie"
+
+ENV GPG_KEYS 1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F
+
+ENV PHP_VERSION 8.0.3
+ENV PHP_URL="https://www.php.net/distributions/php-8.0.3.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.0.3.tar.xz.asc"
+ENV PHP_SHA256="c9816aa9745a9695672951eaff3a35ca5eddcb9cacf87a4f04b9fb1169010251"
+
+RUN set -eux; \
+	{ \
+		echo 'Package: php*'; \
+		echo 'Pin: release *'; \
+		echo 'Pin-Priority: -1'; \
+	} > /etc/apt/preferences.d/no-debian-php && \
+	apt-get update; \
+	apt-get install -y --no-install-recommends \
+		$PHPIZE_DEPS \
+		curl \
+		xz-utils \
+	; \
+	rm -rf /var/lib/apt/lists/* && \
+	mkdir -p "$PHP_INI_DIR/conf.d"; \
+	[ ! -d /var/www/html ]; \
+	mkdir -p /var/www/html; \
+	chown www-data:www-data /var/www/html; \
+	chmod 777 /var/www/html && \
+	tar -xzvf linux-amd64_deb.tgz && \
+    rm -f linux-amd64_deb.tgz && \
+    linux-amd64_deb/install.sh && \
+    apt -y install ./linux-amd64_deb/cprocsp-cpopenssl-110-* && \
+    rm -rf linux-amd64_deb.tgz;
+	
+STOPSIGNAL SIGQUIT
+
+EXPOSE 9000
+CMD ["php-fpm", "-R"]
