@@ -84,6 +84,16 @@ COPY docker-php-source /usr/local/bin/
 RUN set -eux; \
 	\
 	savedAptMark="$(apt-mark showmanual)"; \
+	sed -e 's/stretch/buster/g' /etc/apt/sources.list > /etc/apt/sources.list.d/buster.list; \
+	{ \
+		echo 'Package: *'; \
+		echo 'Pin: release n=buster*'; \
+		echo 'Pin-Priority: -10'; \
+		echo; \
+		echo 'Package: libargon2*'; \
+		echo 'Pin: release n=buster*'; \
+		echo 'Pin-Priority: 990'; \
+	} > /etc/apt/preferences.d/argon2-buster; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
 		libargon2-dev \
